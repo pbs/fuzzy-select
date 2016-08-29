@@ -1,0 +1,22 @@
+{
+  "name": "fuzzy-select",
+  "version": "1.0.0",
+  "description": "A set of flood fill algorithms for finding regions on canvas data",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "start": "browserify -d app.js > bundled.js",
+    "benchmark": "node benchmark",
+    "clean": "rm -f bundled.js"
+  },
+  "keywords": [],
+  "author": "Chip Bell",
+  "license": "MIT",
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
+  },
+  "dependencies": {
+    "browserify": "^13.0.1"
+  }
+}
