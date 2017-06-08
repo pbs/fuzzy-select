@@ -22,10 +22,9 @@ var FuzzySelector = function(colorGrid) {
 FuzzySelector.prototype.select = function(x, y, tolerance) {
   tolerance = tolerance || 0;
 
-  var selector = this;
   var visited = new RangeSet;
   var needToVisit = [ { x: x, y: y }];
-  var cellColor = selector.colorGrid.getXY(x, y);
+  var cellColor = this.colorGrid.getXY(x, y);
 
   while(needToVisit.length > 0) {
     var current = needToVisit.pop();
@@ -42,11 +41,11 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
 
     var left = x - 1, right = x + 1;
     var leftInBounds = left >= 0;
-    var rightInBounds = right < selector.colorGrid.imageData.width;
+    var rightInBounds = right < this.colorGrid.imageData.width;
     var tryReachLeft = true, tryReachRight = true;
 
     // while y is in bounds?
-    while(y < selector.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
+    while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
       if(leftInBounds) {
         var leftInTolerance = this.cellInTolerance(left, y, cellColor, tolerance);
         
