@@ -39,14 +39,13 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
 
     var topY = y;
 
-    var left = x - 1, right = x + 1;
+    var left = x - 1;
     var leftInBounds = left >= 0;
-    var rightInBounds = right < this.colorGrid.imageData.width;
-    var tryReachLeft = true, tryReachRight = true;
+    var tryReachLeft = true;
 
-    // while y is in bounds?
-    while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
-      if(leftInBounds) {
+    y = topY;
+    if(left >= 0) {
+      while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
         var leftInTolerance = this.cellInTolerance(left, y, cellColor, tolerance);
         
         if(tryReachLeft && leftInTolerance && !visited.contains(left, y)) {
@@ -55,9 +54,21 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
         } else if(!tryReachLeft && !leftInTolerance) {
           tryReachLeft = true;
         }
+
+        y++;
       }
-      
-      if(rightInBounds) {
+    }
+    y--;
+
+    var leftY = y;
+
+    y = topY;
+    // while y is in bounds?
+    var tryReachRight = true;
+    var right = x + 1;
+    var rightInBounds = right < this.colorGrid.imageData.width;
+    if(rightInBounds) {
+      while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
         var rightInTolerance = this.cellInTolerance(right, y, cellColor, tolerance);
         
         if(tryReachRight && rightInTolerance && !visited.contains(right, y)) {
@@ -66,12 +77,14 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
         } else if(!tryReachRight && !rightInTolerance) {
           tryReachRight = true;
         }
-      }
 
-      y++;
+        y++;
+      }
     }
     y--;
-    var bottomY = y;
+
+    var rightY = y
+    var bottomY = Math.max(rightY, leftY);
 
     visited.add(new Range(topY, bottomY), x);
   }
