@@ -27,10 +27,6 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
   var needToVisit = [ { x: x, y: y }];
   var cellColor = selector.colorGrid.getXY(x, y);
 
-  var isVisited = function(x, y) {
-    return visited.contains(x, y);
-  }
-
   var withinTolerance = function(x, y) {
     var color = selector.colorGrid.getXY(x, y);
     return FuzzySelector.colorDistance(cellColor, color) < tolerance;
@@ -59,7 +55,7 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
       if(leftInBounds) {
         var leftInTolerance = withinTolerance(left, y);
         
-        if(tryReachLeft && leftInTolerance && !isVisited(left, y)) {
+        if(tryReachLeft && leftInTolerance && !visited.contains(left, y)) {
           needToVisit.push({ x: left, y: y });
           tryReachLeft = false;
         } else if(!tryReachLeft && !leftInTolerance) {
@@ -70,7 +66,7 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
       if(rightInBounds) {
         var rightInTolerance = withinTolerance(right, y);
         
-        if(tryReachRight && rightInTolerance && !isVisited(right, y)) {
+        if(tryReachRight && rightInTolerance && !visited.contains(right, y)) {
           needToVisit.push({ x: right, y: y });
           tryReachRight = false;
         } else if(!tryReachRight && !rightInTolerance) {
