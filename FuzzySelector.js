@@ -27,18 +27,13 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
   var needToVisit = [ { x: x, y: y }];
   var cellColor = selector.colorGrid.getXY(x, y);
 
-  var withinTolerance = function(x, y) {
-    var color = selector.colorGrid.getXY(x, y);
-    return FuzzySelector.colorDistance(cellColor, color) < tolerance;
-  };
-
   while(needToVisit.length > 0) {
     var current = needToVisit.pop();
     var x = current.x;
     var y = current.y;
 
     // march north until we hit the top or a color boundary
-    while(y >= 0 && withinTolerance(x, y)) {
+    while(y >= 0 && this.cellInTolerance(x, y, cellColor, tolerance)) {
       y--;
     }
     y++;
@@ -51,9 +46,9 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
     var tryReachLeft = true, tryReachRight = true;
 
     // while y is in bounds?
-    while(y < selector.colorGrid.imageData.height && withinTolerance(x, y)) {
+    while(y < selector.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
       if(leftInBounds) {
-        var leftInTolerance = withinTolerance(left, y);
+        var leftInTolerance = this.cellInTolerance(left, y, cellColor, tolerance);
         
         if(tryReachLeft && leftInTolerance && !visited.contains(left, y)) {
           needToVisit.push({ x: left, y: y });
@@ -64,7 +59,7 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
       }
       
       if(rightInBounds) {
-        var rightInTolerance = withinTolerance(right, y);
+        var rightInTolerance = this.cellInTolerance(right, y, cellColor, tolerance);
         
         if(tryReachRight && rightInTolerance && !visited.contains(right, y)) {
           needToVisit.push({ x: right, y: y });
@@ -83,6 +78,19 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
   }
 
   return visited;
+};
+
+/**
+ * Returns true if a cell is tolerance of a reference cell
+ *
+ * @param {Number} x The x coordinate of a cell
+ * @param {Number} y The y coordinate of a cell
+ * @param {Object} referenceColor An object with a r, g, and b keys representing a color
+ * @param {Number} tolerance The value the color distance must be under
+ */
+FuzzySelector.prototype.cellInTolerance = function(x, y, referenceColor, tolerance) {
+  var color = this.colorGrid.getXY(x, y);
+  return FuzzySelector.colorDistance(referenceColor, color) < tolerance;
 };
 
 FuzzySelector.washOutColor = function(component, alpha) {
