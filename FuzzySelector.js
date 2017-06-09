@@ -44,6 +44,8 @@ FuzzySelector.prototype.selectIteratively = function* (x, y, tolerance) {
   var needToVisit = [ { x: x, y: y }];
   var cellColor = this.colorGrid.getXY(x, y);
 
+  yield visited;
+
   while(needToVisit.length > 0) {
     var current = needToVisit.pop();
     var x = current.x;
