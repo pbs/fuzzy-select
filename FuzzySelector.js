@@ -20,6 +20,24 @@ var FuzzySelector = function(colorGrid) {
  * @return {RangeSet} A set of scanlines that are in the fuzzy selected region
  */
 FuzzySelector.prototype.select = function(x, y, tolerance) {
+  var selector = this.selectIteratively(x, y, tolerance);
+  var current = { done: false, value: undefined };
+  while(!current.done) {
+    current = selector.next();
+  }
+  return current.value;
+};
+
+/**
+ * Selects a region based a "color delta" defined in `colorDistance`. First, selects the color that is being pointed to
+ * by the passed cell, and then selects neighboring points by ensuring they are with a color distance tolerance
+ * specified by the passed parameter. This parameter defaults to 0. 
+ * @param {Number} x The x position to select from
+ * @param {Number} y The y position to select from
+ * @param {Number} tolerance The tolerance for allowing colors
+ * @return {Generator} A generator that terminates when the selector is done
+ */
+FuzzySelector.prototype.selectIteratively = function* (x, y, tolerance) {
   tolerance = tolerance || 0;
 
   var visited = new RangeSet;
@@ -87,6 +105,8 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
     var bottomY = Math.max(rightY, leftY);
 
     visited.add(new Range(topY, bottomY), x);
+
+    yield visited;
   }
 
   return visited;
