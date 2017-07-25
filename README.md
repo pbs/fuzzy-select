@@ -33,6 +33,36 @@ selectedRegion.forEachRange(function(x, yRange) {
 ```
 In fact, this can be used to draw the region (see [app.js](/app.js)).
 
+## Performance Implications
+For less-powerful devices, this algorithm can be pretty computationally expensive. As a result, the fuzzy select
+algorithm provides an generator-version of the method to allow you to control how to algorithm progresses. This will
+allow you spread the algorithm's work across multiple frames, and potentially cancel the operation based on user
+interaction. The method signature is the same:
+```
+var generator = selector.selectIteratively(0, 0, tolerance);
+
+var stepsPerFrame = 10;
+var doSteps = function() {
+var i = 0, current = { done: false, value: undefined };
+while(i < stepsPerFrame && !current.done) {
+  current = generator.next();
+  i++;
+}
+
+if(current.done) {
+  var t2 = Date.now();
+  setStatus('Selected in ' + (t2 - t1) + 'ms');
+  button.disabled = false;
+  return;
+}
+
+requestAnimationFrame(doSteps);
+};
+
+requestAnimationFrame(doSteps);
+```
+An example of this can be seen in the example `index.html` in this repo (but you'll need to run `npm start` first)
+
 ## Reading from a non-canvas
 This code can also be used for fuzzy selection on any sort of 2 dimensional grid, but will require some work on your\
 part. In order to do so, you'll need to implement your own custom version of `ImageDataColorGrid` that implements an a
