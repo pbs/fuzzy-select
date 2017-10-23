@@ -37,79 +37,95 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
  * @param {Number} tolerance The tolerance for allowing colors
  * @return {Generator} A generator that terminates when the selector is done
  */
-FuzzySelector.prototype.selectIteratively = function* (x, y, tolerance) {
+FuzzySelector.prototype.selectIteratively = function(x, y, tolerance) {
   tolerance = tolerance || 0;
 
   var visited = new RangeSet;
   var needToVisit = [ { x: x, y: y }];
   var cellColor = this.colorGrid.getXY(x, y);
 
-  yield visited;
-
-  while(needToVisit.length > 0) {
-    var current = needToVisit.pop();
-    var x = current.x;
-    var y = current.y;
-
-    // march north until we hit the top or a color boundary
-    while(y >= 0 && this.cellInTolerance(x, y, cellColor, tolerance)) {
-      y--;
+  var selector = this;
+  var generator = {
+    value: visited,
+    done: false,
+    next: function() {
+      selector.doIterativeStep(generator.value, needToVisit, cellColor, tolerance);
+      generator.done = needToVisit.length < 1;
+      return generator;
     }
-    y++;
+  };
 
-    var topY = y;
+  return generator;
+};
 
-    var left = x - 1;
-    var leftInBounds = left >= 0;
-    var tryReachLeft = true;
+/**
+ * Performs a single step of the selection algorithm
+ * @param {RangeSet} visited The currently visited locations
+ * @param {Array} needToVisit The array of { x, y } locations that need to be checked
+ * @param {Object} cellColor An { r, g, b } object representing the color that we're selecting
+ * @param {Number} tolerance The tolerance for rejecting or keeping a color
+ */
+FuzzySelector.prototype.doIterativeStep = function(visited, needToVisit, cellColor, tolerance) {
+  var current = needToVisit.pop();
+  var x = current.x;
+  var y = current.y;
 
-    y = topY;
-    if(left >= 0) {
-      while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
-        var leftInTolerance = this.cellInTolerance(left, y, cellColor, tolerance);
-        
-        if(tryReachLeft && leftInTolerance && !visited.contains(left, y)) {
-          needToVisit.push({ x: left, y: y });
-          tryReachLeft = false;
-        } else if(!tryReachLeft && !leftInTolerance) {
-          tryReachLeft = true;
-        }
-
-        y++;
-      }
-    }
+  // march north until we hit the top or a color boundary
+  while(y >= 0 && this.cellInTolerance(x, y, cellColor, tolerance)) {
     y--;
-
-    var leftY = y;
-
-    y = topY;
-    // while y is in bounds?
-    var tryReachRight = true;
-    var right = x + 1;
-    var rightInBounds = right < this.colorGrid.imageData.width;
-    if(rightInBounds) {
-      while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
-        var rightInTolerance = this.cellInTolerance(right, y, cellColor, tolerance);
-        
-        if(tryReachRight && rightInTolerance && !visited.contains(right, y)) {
-          needToVisit.push({ x: right, y: y });
-          tryReachRight = false;
-        } else if(!tryReachRight && !rightInTolerance) {
-          tryReachRight = true;
-        }
-
-        y++;
-      }
-    }
-    y--;
-
-    var rightY = y
-    var bottomY = Math.max(rightY, leftY);
-
-    visited.add(new Range(topY, bottomY), x);
-
-    yield visited;
   }
+  y++;
+
+  var topY = y;
+
+  var left = x - 1;
+  var leftInBounds = left >= 0;
+  var tryReachLeft = true;
+
+  y = topY;
+  if(left >= 0) {
+    while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
+      var leftInTolerance = this.cellInTolerance(left, y, cellColor, tolerance);
+      
+      if(tryReachLeft && leftInTolerance && !visited.contains(left, y)) {
+        needToVisit.push({ x: left, y: y });
+        tryReachLeft = false;
+      } else if(!tryReachLeft && !leftInTolerance) {
+        tryReachLeft = true;
+      }
+
+      y++;
+    }
+  }
+  y--;
+
+  var leftY = y;
+
+  y = topY;
+  // while y is in bounds?
+  var tryReachRight = true;
+  var right = x + 1;
+  var rightInBounds = right < this.colorGrid.imageData.width;
+  if(rightInBounds) {
+    while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
+      var rightInTolerance = this.cellInTolerance(right, y, cellColor, tolerance);
+      
+      if(tryReachRight && rightInTolerance && !visited.contains(right, y)) {
+        needToVisit.push({ x: right, y: y });
+        tryReachRight = false;
+      } else if(!tryReachRight && !rightInTolerance) {
+        tryReachRight = true;
+      }
+
+      y++;
+    }
+  }
+  y--;
+
+  var rightY = y
+  var bottomY = Math.max(rightY, leftY);
+
+  visited.add(new Range(topY, bottomY), x);
 
   return visited;
 };
