@@ -37,20 +37,25 @@ FuzzySelector.prototype.select = function(x, y, tolerance) {
  * @param {Number} tolerance The tolerance for allowing colors
  * @return {Generator} A generator that terminates when the selector is done
  */
-FuzzySelector.prototype.selectIteratively = function* (x, y, tolerance) {
+FuzzySelector.prototype.selectIteratively = function(x, y, tolerance) {
   tolerance = tolerance || 0;
 
   var visited = new RangeSet;
   var needToVisit = [ { x: x, y: y }];
   var cellColor = this.colorGrid.getXY(x, y);
 
-  yield visited;
+  var selector = this;
+  var generator = {
+    value: visited,
+    done: false,
+    next: function() {
+      selector.doIterativeStep(generator.value, needToVisit, cellColor, tolerance);
+      generator.done = needToVisit.length < 1;
+      return generator;
+    }
+  };
 
-  while(needToVisit.length > 0) {
-    yield this.doIterativeStep (visited, needToVisit, cellColor, tolerance);
-  }
-
-  return visited;
+  return generator;
 };
 
 /**
