@@ -20,73 +20,127 @@ var FuzzySelector = function(colorGrid) {
  * @return {RangeSet} A set of scanlines that are in the fuzzy selected region
  */
 FuzzySelector.prototype.select = function(x, y, tolerance) {
+  var selector = this.selectIteratively(x, y, tolerance);
+  var current = { done: false, value: undefined };
+  while(!current.done) {
+    current = selector.next();
+  }
+  return current.value;
+};
+
+/**
+ * Selects a region based a "color delta" defined in `colorDistance`. First, selects the color that is being pointed to
+ * by the passed cell, and then selects neighboring points by ensuring they are with a color distance tolerance
+ * specified by the passed parameter. This parameter defaults to 0. 
+ * @param {Number} x The x position to select from
+ * @param {Number} y The y position to select from
+ * @param {Number} tolerance The tolerance for allowing colors
+ * @return {Generator} A generator that terminates when the selector is done
+ */
+FuzzySelector.prototype.selectIteratively = function(x, y, tolerance) {
   tolerance = tolerance || 0;
 
-  var selector = this;
   var visited = new RangeSet;
   var needToVisit = [ { x: x, y: y }];
-  var cellColor = selector.colorGrid.getXY(x, y);
+  var cellColor = this.colorGrid.getXY(x, y);
 
-  var isVisited = function(x, y) {
-    return visited.contains(x, y);
-  }
-
-  var withinTolerance = function(x, y) {
-    var color = selector.colorGrid.getXY(x, y);
-    return FuzzySelector.colorDistance(cellColor, color) < tolerance;
+  var selector = this;
+  var generator = {
+    value: visited,
+    done: false,
+    next: function() {
+      selector.doIterativeStep(generator.value, needToVisit, cellColor, tolerance);
+      generator.done = needToVisit.length < 1;
+      return generator;
+    }
   };
 
-  while(needToVisit.length > 0) {
-    var current = needToVisit.pop();
-    var x = current.x;
-    var y = current.y;
+  return generator;
+};
 
-    // march north until we hit the top or a color boundary
-    while(y >= 0 && withinTolerance(x, y)) {
-      y--;
-    }
-    y++;
+/**
+ * Performs a single step of the selection algorithm
+ * @param {RangeSet} visited The currently visited locations
+ * @param {Array} needToVisit The array of { x, y } locations that need to be checked
+ * @param {Object} cellColor An { r, g, b } object representing the color that we're selecting
+ * @param {Number} tolerance The tolerance for rejecting or keeping a color
+ */
+FuzzySelector.prototype.doIterativeStep = function(visited, needToVisit, cellColor, tolerance) {
+  var current = needToVisit.pop();
+  var x = current.x;
+  var y = current.y;
 
-    var topY = y;
+  // march north until we hit the top or a color boundary
+  while(y >= 0 && this.cellInTolerance(x, y, cellColor, tolerance)) {
+    y--;
+  }
+  y++;
 
-    var left = x - 1, right = x + 1;
-    var leftInBounds = left >= 0;
-    var rightInBounds = right < selector.colorGrid.imageData.width;
-    var tryReachLeft = true, tryReachRight = true;
+  var topY = y;
 
-    // while y is in bounds?
-    while(y < selector.colorGrid.imageData.height && withinTolerance(x, y)) {
-      if(leftInBounds) {
-        var leftInTolerance = withinTolerance(left, y);
-        
-        if(tryReachLeft && leftInTolerance && !isVisited(left, y)) {
-          needToVisit.push({ x: left, y: y });
-          tryReachLeft = false;
-        } else if(!tryReachLeft && !leftInTolerance) {
-          tryReachLeft = true;
-        }
-      }
+  var left = x - 1;
+  var leftInBounds = left >= 0;
+  var tryReachLeft = true;
+
+  y = topY;
+  if(left >= 0) {
+    while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
+      var leftInTolerance = this.cellInTolerance(left, y, cellColor, tolerance);
       
-      if(rightInBounds) {
-        var rightInTolerance = withinTolerance(right, y);
-        
-        if(tryReachRight && rightInTolerance && !isVisited(right, y)) {
-          needToVisit.push({ x: right, y: y });
-          tryReachRight = false;
-        } else if(!tryReachRight && !rightInTolerance) {
-          tryReachRight = true;
-        }
+      if(tryReachLeft && leftInTolerance && !visited.contains(left, y)) {
+        needToVisit.push({ x: left, y: y });
+        tryReachLeft = false;
+      } else if(!tryReachLeft && !leftInTolerance) {
+        tryReachLeft = true;
       }
 
       y++;
     }
-    y--;
-    var bottomY = y;
-
-    visited.add(new Range(topY, bottomY), x);
   }
+  y--;
+
+  var leftY = y;
+
+  y = topY;
+  // while y is in bounds?
+  var tryReachRight = true;
+  var right = x + 1;
+  var rightInBounds = right < this.colorGrid.imageData.width;
+  if(rightInBounds) {
+    while(y < this.colorGrid.imageData.height && this.cellInTolerance(x, y, cellColor, tolerance)) {
+      var rightInTolerance = this.cellInTolerance(right, y, cellColor, tolerance);
+      
+      if(tryReachRight && rightInTolerance && !visited.contains(right, y)) {
+        needToVisit.push({ x: right, y: y });
+        tryReachRight = false;
+      } else if(!tryReachRight && !rightInTolerance) {
+        tryReachRight = true;
+      }
+
+      y++;
+    }
+  }
+  y--;
+
+  var rightY = y
+  var bottomY = Math.max(rightY, leftY);
+
+  visited.add(new Range(topY, bottomY), x);
 
   return visited;
+};
+
+/**
+ * Returns true if a cell is tolerance of a reference cell
+ *
+ * @param {Number} x The x coordinate of a cell
+ * @param {Number} y The y coordinate of a cell
+ * @param {Object} referenceColor An object with a r, g, and b keys representing a color
+ * @param {Number} tolerance The value the color distance must be under
+ */
+FuzzySelector.prototype.cellInTolerance = function(x, y, referenceColor, tolerance) {
+  var color = this.colorGrid.getXY(x, y);
+  return FuzzySelector.colorDistance(referenceColor, color) < tolerance;
 };
 
 FuzzySelector.washOutColor = function(component, alpha) {
