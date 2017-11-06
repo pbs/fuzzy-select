@@ -50,4 +50,34 @@ describe('RangeSet', function() {
       expect(path).to.equal('M0,0 M2,1 L2,10 M3,2 L3,5');
     });
   });
+
+  describe('last', function() {
+    it('should return null if the set is empty', function() {
+      expect(set.last).to.equal(null);
+    });
+
+    it('should return the last element set', function() {
+      set.add(new Range(1, 10), 2);
+
+      expect(set.last).to.not.equal(null);
+      expect(set.last.x).to.equal(2);
+      expect(set.last.range.min).to.equal(1);
+      expect(set.last.range.max).to.equal(10);
+    });
+
+    it('should update if a new element is added', function() {
+      set.add(new Range(3, 8), 1);
+      set.add(new Range(1, 10), 2);
+
+      expect(set.last).to.not.equal(null);
+      expect(set.last.x).to.equal(2);
+      expect(set.last.range.min).to.equal(1);
+      expect(set.last.range.max).to.equal(10);
+    });
+
+    it('should not be settable', function() {
+      set.last = 'NOT SETTABLE';
+      expect(set.last).to.equal(null);
+    });
+  });
 });
