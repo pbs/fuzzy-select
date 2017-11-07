@@ -6,6 +6,7 @@ var CellSet = require('./CellSet');
  */
 var RangeSet = function() {
   this.ranges = {};
+  this._last = null;
 };
 
 /**
@@ -19,6 +20,11 @@ RangeSet.prototype.add = function(range, x) {
   }
 
   this.ranges[x].push(range);
+
+  this._last = {
+    x: x,
+    range: range
+  };
 };
 
 /**
@@ -83,5 +89,19 @@ RangeSet.prototype.toPathString = function() {
   });
   return path;
 };
+
+/**
+ * Retrieves the last value added to the range set for iterative drawing improvements
+ * @return {Object}
+ * @return {Object.x} The x value of the scanline
+ * @return {Object.range} The range set of the scanline
+ */
+Object.defineProperty(RangeSet.prototype, 'last', {
+  get: function() {
+    return this._last;
+  },
+  enumerable: true,
+  configurable: true
+});
 
 module.exports = RangeSet;
