@@ -1,7 +1,6 @@
 var Cell = require('./Cell');
 var ImageDataColorGrid = require('./ImageDataColorGrid');
 var FuzzySelector = require('./FuzzySelector');
-var Graph = require('./Graph');
 
 // Helper for stubbing an image data object
 var makeImageData = function(N) {
