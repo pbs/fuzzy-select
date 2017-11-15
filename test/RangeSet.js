@@ -33,15 +33,6 @@ describe('RangeSet', function() {
     });
   });
 
-  describe('boundaries', function() {
-    it('should return a cell set of boundaries', function() {
-      set.add(new Range(0, 1), 2);
-      set.add(new Range(1, 2), 1);
-      var cells = set.boundaries().cells;
-      expect(cells.length).to.equal(4);
-    });
-  });
-
   describe('toPathString', function() {
     it('should return a valid SVG path string matching the provided set', function() {
       set.add(new Range(1, 10), 2);
