@@ -7,15 +7,6 @@ var ImageDataColorGrid = function(imageData) {
   this.imageData = imageData;
 };
 
-/**
- * Gets the value of a color a particular point
- *
- * @param {Cell} cell The cell to query
- */
-ImageDataColorGrid.prototype.get = function(cell) {
-  return this.getXY(cell.x, cell.y);
-}
-
 ImageDataColorGrid.prototype.getXY = function(x, y) {
   var offset = (this.imageData.width * y + x) << 2;
 

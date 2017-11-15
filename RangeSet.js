@@ -1,5 +1,3 @@
-var Cell = require('./Cell');
-
 /**
  * Represents a set of y-ranges, positioned at x coordinates. Perhaps a set of scanlines?
  */

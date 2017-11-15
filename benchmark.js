@@ -1,4 +1,3 @@
-var Cell = require('./Cell');
 var ImageDataColorGrid = require('./ImageDataColorGrid');
 var FuzzySelector = require('./FuzzySelector');
 
@@ -27,7 +26,7 @@ sizesToUse.forEach(function(N) {
 
   var imageData = makeImageData(N);
 
-  var centerCell = new Cell({ x: Math.round(N / 2), y: Math.round(N/2) });
+  var centerCell = { x: Math.round(N / 2), y: Math.round(N/2) };
 
   var colorGrid = new ImageDataColorGrid(imageData);
   var selector = new FuzzySelector(colorGrid);
