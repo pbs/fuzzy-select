@@ -1,6 +1,3 @@
-var Cell = require('./Cell');
-var CellSet = require('./CellSet');
-
 /**
  * Represents a set of y-ranges, positioned at x coordinates. Perhaps a set of scanlines?
  */
@@ -61,20 +58,6 @@ RangeSet.prototype.forEachRange = function(F) {
       F(x, yRanges[j]);
     }
   }
-};
-
-/**
- * Enumerates all of the boundaries of the set
- * @return {CellSet}
- */
-RangeSet.prototype.boundaries = function() {
-  var cells = new CellSet();
-  this.forEachRange(function(x, y) {
-    cells.add(new Cell({ x: x, y: y.min }));
-    cells.add(new Cell({ x: x, y: y.max }));
-  });
-
-  return cells;
 };
 
 /**

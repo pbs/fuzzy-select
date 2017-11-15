@@ -1,9 +1,8 @@
 var expect = require('chai').expect;
-var Cell = require('../Cell');
 var ImageDataColorGrid = require('../ImageDataColorGrid');
 
 describe('ImageDataColorGrid', function() {
-  describe('get', function() {
+  describe('getXY', function() {
     it('should unpack height and width values appropriately', function() {
       // Emulate ImageData instance
       var colors = [
@@ -18,10 +17,10 @@ describe('ImageDataColorGrid', function() {
 
       var colorGrid = new ImageDataColorGrid(imageData);
 
-      expect(colorGrid.get(new Cell({ x: 0, y: 0 }))).to.deep.equal({ r: 1, g: 2, b: 3, a: 4 })
-      expect(colorGrid.get(new Cell({ x: 1, y: 0 }))).to.deep.equal({ r: 5, g: 6, b: 7, a: 8 })
-      expect(colorGrid.get(new Cell({ x: 0, y: 1 }))).to.deep.equal({ r: 9, g: 10, b: 11, a: 12 })
-      expect(colorGrid.get(new Cell({ x: 1, y: 1 }))).to.deep.equal({ r: 13, g: 14, b: 15, a: 16 })
+      expect(colorGrid.getXY(0, 0)).to.deep.equal({ r: 1, g: 2, b: 3, a: 4 })
+      expect(colorGrid.getXY(1, 0)).to.deep.equal({ r: 5, g: 6, b: 7, a: 8 })
+      expect(colorGrid.getXY(0, 1)).to.deep.equal({ r: 9, g: 10, b: 11, a: 12 })
+      expect(colorGrid.getXY(1, 1)).to.deep.equal({ r: 13, g: 14, b: 15, a: 16 })
     });
 
     it('should handle mixed width and height appropriately', function() {
@@ -37,7 +36,7 @@ describe('ImageDataColorGrid', function() {
       };
 
       var colorGrid = new ImageDataColorGrid(imageData);
-      expect(colorGrid.get(new Cell({ x: 0, y: 1 }))).to.deep.equal({ r: 1, g: 1, b: 1, a: 1 });
+      expect(colorGrid.getXY(0, 1)).to.deep.equal({ r: 1, g: 1, b: 1, a: 1 });
     });
   });
 });

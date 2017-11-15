@@ -17,7 +17,10 @@ describe('FuzzySelector', function() {
       var colorGrid = new ImageDataColorGrid(imageData);
       var selector = new FuzzySelector(colorGrid);
       var set = selector.select(0, 0, 1);
-      expect(set.boundaries().cells.length).to.equal(3);
+      expect(set.contains(0, 0)).to.equal(true);
+      expect(set.contains(1, 0)).to.equal(true);
+      expect(set.contains(0, 1)).to.equal(true);
+      expect(set.contains(1, 1)).to.equal(false);
     });
 
     it('should not leak through corners', function() {
@@ -33,6 +36,9 @@ describe('FuzzySelector', function() {
       var colorGrid = new ImageDataColorGrid(imageData);
       var selector = new FuzzySelector(colorGrid);
       var set = selector.select(0, 0, 1);
+      expect(set.contains(0, 0)).to.equal(true);
+      expect(set.contains(1, 0)).to.equal(false);
+      expect(set.contains(0, 1)).to.equal(false);
       expect(set.contains(1, 1)).to.equal(false);
     });
 
@@ -44,7 +50,10 @@ describe('FuzzySelector', function() {
       var colorGrid = new ImageDataColorGrid(imageData);
       var selector = new FuzzySelector(colorGrid);
       var set = selector.select(1, 1, 20);
-      expect(set.boundaries().cells.length).to.equal(10);
+      expect(set.contains(0, 0)).to.equal(true);
+      expect(set.contains(4, 0)).to.equal(true);
+      expect(set.contains(0, 4)).to.equal(true);
+      expect(set.contains(4, 4)).to.equal(true);
     });
 
     it('should handle diagonals properly', function() {
@@ -62,7 +71,30 @@ describe('FuzzySelector', function() {
       var colorGrid = new ImageDataColorGrid(imageData);
       var selector = new FuzzySelector(colorGrid);
       var set = selector.select(3, 3, 1);
-      expect(set.boundaries().cells.length).to.equal(8);
+      expect(set.contains(0, 0)).to.equal(true);
+      expect(set.contains(1, 0)).to.equal(true);
+      expect(set.contains(2, 0)).to.equal(false);
+      expect(set.contains(3, 0)).to.equal(true);
+      
+      expect(set.contains(0, 1)).to.equal(true);
+      expect(set.contains(1, 1)).to.equal(false);
+      expect(set.contains(2, 1)).to.equal(false);
+      expect(set.contains(3, 1)).to.equal(true);
+      
+      expect(set.contains(0, 2)).to.equal(true);
+      expect(set.contains(1, 2)).to.equal(true);
+      expect(set.contains(2, 2)).to.equal(true);
+      expect(set.contains(3, 2)).to.equal(true);
+      
+      expect(set.contains(0, 3)).to.equal(true);
+      expect(set.contains(1, 3)).to.equal(false);
+      expect(set.contains(2, 3)).to.equal(false);
+      expect(set.contains(3, 3)).to.equal(true);
+
+      expect(set.contains(0, 4)).to.equal(true);
+      expect(set.contains(1, 4)).to.equal(true);
+      expect(set.contains(2, 4)).to.equal(false);
+      expect(set.contains(3, 4)).to.equal(true);
     });
   });
 

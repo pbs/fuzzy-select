@@ -1,6 +1,5 @@
 var ImageDataColorGrid = require('./ImageDataColorGrid');
 var FuzzySelector = require('./FuzzySelector');
-var Graph = require('./Graph');
 
 var setStatus = function(value) {
     document.getElementById('status').innerText = value;
